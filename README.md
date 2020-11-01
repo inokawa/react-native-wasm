@@ -1,16 +1,19 @@
 # react-native-wasm
 
+WIP
+
 ## Getting started
 
-`$ npm install react-native-wasm --save`
+`$ npm install TODO --save`
 
 ### Mostly automatic installation
 
-`$ react-native link react-native-wasm`
+`$ react-native link TODO`
 
 ## Usage
+
 ```javascript
-import Wasm from 'react-native-wasm';
+import Wasm from "TODO";
 
 // TODO: What to do with the module?
 Wasm;
