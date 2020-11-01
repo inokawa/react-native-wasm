@@ -6,23 +6,16 @@ Pod::Spec.new do |s|
   s.name         = "react-native-wasm"
   s.version      = package["version"]
   s.summary      = package["description"]
-  s.description  = <<-DESC
-                  react-native-wasm
-                   DESC
-  s.homepage     = "https://github.com/github_account/react-native-wasm"
-  # brief license entry:
-  s.license      = "MIT"
-  # optional - use expanded license entry instead:
-  # s.license    = { :type => "MIT", :file => "LICENSE" }
-  s.authors      = { "Your Name" => "yourname@email.com" }
-  s.platforms    = { :ios => "9.0" }
-  s.source       = { :git => "https://github.com/github_account/react-native-wasm.git", :tag => "#{s.version}" }
+  s.homepage     = package["homepage"]
+  s.license      = package["license"]
+  s.authors      = package["author"]
 
-  s.source_files = "ios/**/*.{h,c,m,swift}"
-  s.requires_arc = true
+  s.platforms    = { :ios => "9.0" }
+  s.source       = { :git => "https://github.com/inokawa/react-native-wasm.git", :tag => "#{s.version}" }
+
+  
+  s.source_files = "ios/**/*.{h,m,mm,swift}"
+  
 
   s.dependency "React"
-  # ...
-  # s.dependency "..."
 end
-
