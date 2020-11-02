@@ -1,7 +1,7 @@
 {
   "name": "react-native-wasm",
   "title": "React Native Wasm",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "TODO",
   "main": "index.js",
   "files": [
