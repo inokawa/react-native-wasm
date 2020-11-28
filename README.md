@@ -1,6 +1,8 @@
 # react-native-wasm
 
-WIP
+A polyfill to use [WebAssembly](https://webassembly.org/) in [React Native](https://github.com/facebook/react-native).
+
+**This is under development**
 
 ## Getting started
 
