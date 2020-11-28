@@ -1,4 +1,13 @@
-import { NativeModules, NativeEventEmitter, Platform } from "react-native";
+import {
+  NativeModules,
+  NativeEventEmitter,
+  Platform,
+  Image,
+} from "react-native";
+
+const { resolveAssetSource } = Image;
+
+export const resolveWasm = (w) => resolveAssetSource(w).uri;
 
 const { Wasm } = NativeModules;
 const eventEmitter = new NativeEventEmitter(Wasm);
