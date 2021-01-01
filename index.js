@@ -10,7 +10,7 @@ if (Platform.OS === "ios") {
   const { Wasm } = NativeModules;
   const eventEmitter = new NativeEventEmitter(Wasm);
 
-  const instantiate = (bytes) =>
+  const instantiate = (buffer) =>
     new Promise((resolve, reject) => {
       const subscription = eventEmitter.addListener("resolve", (res) => {
         subscription.remove();
@@ -30,7 +30,7 @@ if (Platform.OS === "ios") {
         }
       });
 
-      Wasm.instantiate(bytes.toString())
+      Wasm.instantiate(buffer.toString())
         .then((res) => {
           if (!res) {
             subscription.remove();
@@ -44,8 +44,8 @@ if (Platform.OS === "ios") {
     });
 
   const wasmPolyfill = {
-    instantiate: (bytes, importObject) => {
-      return instantiate(bytes);
+    instantiate: (buffer, importObject) => {
+      return instantiate(buffer);
     },
     // `instantiateStreaming` do not work because `FileReader.readAsArrayBuffer` is not supported by React Native currently.
     // instantiateStreaming: (response, importObject) =>
