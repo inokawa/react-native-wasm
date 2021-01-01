@@ -11,7 +11,7 @@ class Wasm: RCTEventEmitter, WKScriptMessageHandler {
         let webCfg: WKWebViewConfiguration = WKWebViewConfiguration()
         
         let userController: WKUserContentController = WKUserContentController()
-        userController.add(self, name: "wasmResolved")
+        userController.add(self, name: "resolve")
         webCfg.userContentController = userController
         
         webView = WKWebView(frame: .zero, configuration: webCfg)
@@ -23,7 +23,7 @@ class Wasm: RCTEventEmitter, WKScriptMessageHandler {
           promise = WebAssembly.instantiate(Uint8Array.from(bytes));
           promise.then(function(res){
             wasm = res;
-            window.webkit.messageHandlers.wasmResolved.postMessage(JSON.stringify(Object.keys(wasm.instance.exports)));
+            window.webkit.messageHandlers.resolve.postMessage(JSON.stringify(Object.keys(wasm.instance.exports)));
           }).catch(function(e){
             // TODO
           })
@@ -65,12 +65,12 @@ class Wasm: RCTEventEmitter, WKScriptMessageHandler {
     }
     
     override func supportedEvents() -> [String]! {
-        return ["wasmResolved"]
+        return ["resolve"]
     }
     
     func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
-        if(message.name == "wasmResolved") {
-            sendEvent(withName: "wasmResolved", body: message.body)
+        if(message.name == "resolve") {
+            sendEvent(withName: "resolve", body: message.body)
         }
     }
 }

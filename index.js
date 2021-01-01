@@ -16,7 +16,7 @@ if (Platform.OS === "ios") {
   const instantiate = (bytes) =>
     new Promise((resolve, reject) => {
       const subscription = eventEmitter.addListener(
-        "wasmResolved",
+        "resolve",
         (methodNames) => {
           subscription.remove();
           resolve({
