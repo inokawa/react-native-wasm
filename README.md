@@ -2,21 +2,63 @@
 
 A polyfill to use [WebAssembly](https://webassembly.org/) in [React Native](https://github.com/facebook/react-native).
 
-**This is under development**
+## Install
 
-## Getting started
+```sh
+npm install react-native-wasm
 
-`$ npm install TODO --save`
+# <=0.59 you have to link manually.
+react-native link react-native-wasm
 
-### Mostly automatic installation
+# In iOS
+cd ios && pod install
+```
 
-`$ react-native link TODO`
+And currently you have to create bridging header manually in iOS.
+
+https://reactnative.dev/docs/native-modules-ios#exporting-swift
+
+> Important when making third party modules: Static libraries with Swift are only supported in Xcode 9 and later. In order for the Xcode project to build when you use Swift in the iOS static library you include in the module, your main app project must contain Swift code and a bridging header itself. If your app project does not contain any Swift code, a workaround can be a single empty .swift file and an empty bridging header.
+
+### Requirements
+
+- react-native 0.59+ (because of [Proxy](https://developer.mozilla.org/ja/docs/Web/JavaScript/Reference/Global_Objects/Proxy) support in React Native)
 
 ## Usage
 
 ```javascript
-import Wasm from "TODO";
+// index.js
+import { AppRegistry } from "react-native";
+import "react-native-wasm";
+...
 
-// TODO: What to do with the module?
-Wasm;
+AppRegistry.registerComponent(appName, () => App);
+
+// Foo.js
+const buffer = Uint8Array.from([
+	 0x00,0x61,0x73,0x6D,0x01,0x00,0x00,0x00
+	,0x01,0x87,0x80,0x80,0x80,0x00,0x01,0x60
+	,0x02,0x7F,0x7F,0x01,0x7F,0x03,0x82,0x80
+	,0x80,0x80,0x00,0x01,0x00,0x07,0x87,0x80
+	,0x80,0x80,0x00,0x01,0x03,0x61,0x64,0x64
+	,0x00,0x00,0x0A,0x8D,0x80,0x80,0x80,0x00
+	,0x01,0x87,0x80,0x80,0x80,0x00,0x00,0x20
+	,0x00,0x20,0x01,0x6A,0x0B]);
+
+WebAssembly.instantiate(buffer).then((res) => {
+  console.log(res.instance.exports.add(3, 5)); // 8
+});
 ```
+
+## TODOs
+
+- [x] instantiate
+  - [x] Support iOS
+  - [ ] Support Android
+  - [ ] Support importObject
+- [ ] compile
+- [ ] validate
+- [ ] WebAssembly.Instance
+- [ ] WebAssembly.Module
+- [ ] WebAssembly.Memory
+- [ ] WebAssembly.Table
