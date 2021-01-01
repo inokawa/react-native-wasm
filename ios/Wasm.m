@@ -5,6 +5,6 @@
 
 RCT_EXTERN_METHOD(instantiate:(NSString *)bytes resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
 
-RCT_EXTERN__BLOCKING_SYNCHRONOUS_METHOD(call:(NSString *)name arguments:(NSString *)args)
+RCT_EXTERN__BLOCKING_SYNCHRONOUS_METHOD(call:(NSString *)modId funcName:(NSString *)name arguments:(NSString *)args)
 
 @end

@@ -17,16 +17,22 @@ class Wasm: RCTEventEmitter, WKScriptMessageHandler {
         webView = WKWebView(frame: .zero, configuration: webCfg)
         
         let js: String = """
-        var wasm;
-        var promise;
+        var generateId = function () {
+          return new Date().getTime().toString(16) + Math.floor(1000 * Math.random()).toString(16);
+        }
+        var wasm = {};
+        var promise = {};
         function instantiate(bytes){
-          promise = WebAssembly.instantiate(Uint8Array.from(bytes));
-          promise.then(function(res){
-            wasm = res;
-            window.webkit.messageHandlers.resolve.postMessage(JSON.stringify(Object.keys(wasm.instance.exports)));
-          }).catch(function(e){
-            // TODO
-          })
+          var id = generateId();
+          promise[id] = WebAssembly.instantiate(Uint8Array.from(bytes))
+            .then(function(res){
+              delete promise[id];
+              wasm[id] = res;
+              window.webkit.messageHandlers.resolve.postMessage(JSON.stringify({id: id, keys: Object.keys(wasm.instance.exports)}));
+            }).catch(function(e){
+              delete promise[id];
+              // TODO
+            });
           return true;
         }
         """
@@ -45,12 +51,12 @@ class Wasm: RCTEventEmitter, WKScriptMessageHandler {
     }
 
     @objc @discardableResult
-    func call(_ name: NSString, arguments args: NSString) -> NSNumber {
+    func call(_ modId: NSString, funcName name: NSString, arguments args: NSString) -> NSNumber {
         var result: NSNumber = 0
         var isCompletion: Bool = false
         let js: String = """
         (function(){
-          return wasm.instance.exports.\(name)(...\(args));
+          return wasm[\(modId)].instance.exports.\(name)(...\(args));
         })();
         """
         DispatchQueue.main.async {

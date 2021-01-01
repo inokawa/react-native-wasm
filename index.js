@@ -5,31 +5,30 @@ import {
   Image,
 } from "react-native";
 
-const { resolveAssetSource } = Image;
-
-export const resolveWasm = (w) => resolveAssetSource(w).uri;
-
-const { Wasm } = NativeModules;
-const eventEmitter = new NativeEventEmitter(Wasm);
 
 if (Platform.OS === "ios") {
+  const { Wasm } = NativeModules;
+  const eventEmitter = new NativeEventEmitter(Wasm);
+
   const instantiate = (bytes) =>
     new Promise((resolve, reject) => {
-      const subscription = eventEmitter.addListener(
-        "resolve",
-        (methodNames) => {
-          subscription.remove();
+      const subscription = eventEmitter.addListener("resolve", (res) => {
+        subscription.remove();
+        try {
+          const { id, keys } = JSON.parse(res);
           resolve({
             instance: {
-              exports: JSON.parse(methodNames).reduce((acc, k) => {
-                acc[k] = (...args) => Wasm.call(k, JSON.stringify(args));
+              exports: JSON.parse(keys).reduce((acc, k) => {
+                acc[k] = (...args) => Wasm.call(id, k, JSON.stringify(args));
                 return acc;
               }, {}),
             },
             module: {},
           });
+        } catch (e) {
+          // TODO
         }
-      );
+      });
 
       Wasm.instantiate(bytes.toString())
         .then((res) => {
@@ -44,8 +43,10 @@ if (Platform.OS === "ios") {
         });
     });
 
-  window.WebAssembly = {
-    instantiate: (bytes, importObject) => instantiate(bytes),
+  const wasmPolyfill = {
+    instantiate: (bytes, importObject) => {
+      return instantiate(bytes);
+    },
     // `instantiateStreaming` do not work because `FileReader.readAsArrayBuffer` is not supported by React Native currently.
     // instantiateStreaming: (response, importObject) =>
     //   Promise.resolve(response.arrayBuffer()).then((bytes) =>
@@ -55,4 +56,6 @@ if (Platform.OS === "ios") {
     compileStreaming: () => {},
     validate: () => true,
   };
+
+  window.WebAssembly = window.WebAssembly || wasmPolyfill;
 }
