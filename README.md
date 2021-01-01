@@ -2,6 +2,9 @@
 
 A polyfill to use [WebAssembly](https://webassembly.org/) in [React Native](https://github.com/facebook/react-native).
 
+This package instantiate WebAssembly in native WebView environment and make communication with React Native to simulate original behavior.
+Native module of React Native has limited argument types ([iOS](https://reactnative.dev/docs/native-modules-ios#argument-types)/[Android](https://reactnative.dev/docs/native-modules-android#argument-types)) so we need to serialize/deserialize the exchanging data, which may have some overhead but will work as in web app.
+
 ## Install
 
 ```sh
