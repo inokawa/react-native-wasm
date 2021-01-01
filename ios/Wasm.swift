@@ -42,9 +42,10 @@ class Wasm: RCTEventEmitter, WKScriptMessageHandler {
     func instantiate(_ bytes: NSString, resolver resolve: @escaping RCTPromiseResolveBlock, rejecter reject: RCTPromiseRejectBlock) -> Void {
         DispatchQueue.main.async {
             self.webView.evaluateJavaScript("instantiate([\(bytes)]);") { (value, error) in
-                if error {
-                    return reject(error)
-                }
+                // TODO
+                // if error {
+                //     return reject(error)
+                // }
                 resolve(value)
             }
         }
