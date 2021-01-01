@@ -2,7 +2,7 @@
   "name": "react-native-wasm",
   "title": "React Native Wasm",
   "version": "0.0.1",
-  "description": "TODO",
+  "description": "A polyfill to use WebAssembly in React Native.",
   "main": "index.js",
   "files": [
     "README.md",
@@ -29,6 +29,8 @@
     "react",
     "react-native",
     "webassembly",
+    "wasm",
+    "polyfill",
     "ios",
     "android"
   ],
