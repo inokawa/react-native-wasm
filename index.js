@@ -5,7 +5,6 @@ import {
   Image,
 } from "react-native";
 
-
 if (Platform.OS === "ios") {
   const { Wasm } = NativeModules;
   const eventEmitter = new NativeEventEmitter(Wasm);
@@ -26,7 +25,7 @@ if (Platform.OS === "ios") {
             module: {},
           });
         } catch (e) {
-          // TODO
+          reject(e);
         }
       });
 
@@ -34,7 +33,7 @@ if (Platform.OS === "ios") {
         .then((res) => {
           if (!res) {
             subscription.remove();
-            reject("failed to contact to webview");
+            reject("failed to instantiate WebAssembly");
           }
         })
         .catch((e) => {
