@@ -39,6 +39,11 @@ class Wasm: RCTEventEmitter, WKScriptMessageHandler {
     }
     
     @objc
+    override static func requiresMainQueueSetup() -> Bool {
+      return true
+    }
+    
+    @objc
     func instantiate(_ bytes: NSString, resolver resolve: @escaping RCTPromiseResolveBlock, rejecter reject: RCTPromiseRejectBlock) -> Void {
         DispatchQueue.main.async {
             self.webView.evaluateJavaScript("instantiate([\(bytes)]);") { (value, error) in
