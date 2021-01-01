@@ -46,10 +46,11 @@ if (Platform.OS === "ios") {
 
   window.WebAssembly = {
     instantiate: (bytes, importObject) => instantiate(bytes),
-    instantiateStreaming: (response, importObject) =>
-      Promise.resolve(response.arrayBuffer()).then((bytes) =>
-        instantiate(bytes)
-      ),
+    // `instantiateStreaming` do not work because `FileReader.readAsArrayBuffer` is not supported by React Native currently.
+    // instantiateStreaming: (response, importObject) =>
+    //   Promise.resolve(response.arrayBuffer()).then((bytes) =>
+    //     instantiate(bytes)
+    //   ),
     compile: (bytes) => {},
     compileStreaming: () => {},
     validate: () => true,
