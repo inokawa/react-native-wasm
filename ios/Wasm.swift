@@ -31,7 +31,7 @@ class Wasm: RCTEventEmitter, WKScriptMessageHandler {
               window.webkit.messageHandlers.resolve.postMessage(JSON.stringify({id: id, keys: Object.keys(wasm.instance.exports)}));
             }).catch(function(e){
               delete promise[id];
-              // TODO
+              // TODO handle error
             });
           return true;
         }
@@ -66,6 +66,7 @@ class Wasm: RCTEventEmitter, WKScriptMessageHandler {
         """
         DispatchQueue.main.async {
             self.webView.evaluateJavaScript(js) { (value, error) in
+                // TODO handle error
                 result = value as! NSNumber ?? 0
                 isCompletion = true
             }
