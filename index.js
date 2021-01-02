@@ -1,9 +1,4 @@
-import {
-  NativeModules,
-  NativeEventEmitter,
-  Platform,
-  Image,
-} from "react-native";
+import { NativeModules, NativeEventEmitter, Platform } from "react-native";
 
 if (Platform.OS === "ios") {
   const { Wasm } = NativeModules;
