@@ -4,11 +4,7 @@ import WebKit
 let js: String = """
 var wasm = {};
 var promise = {};
-function generateId() {
-  return new Date().getTime().toString(16) + Math.floor(1000 * Math.random()).toString(16);
-}
-function instantiate(bytes){
-  var id = generateId();
+function instantiate(id, bytes){
   promise[id] = WebAssembly.instantiate(Uint8Array.from(bytes))
     .then(function(res){
       delete promise[id];
@@ -18,7 +14,7 @@ function instantiate(bytes){
       delete promise[id];
       // TODO handle error
     });
-  return id;
+  return true;
 }
 """
 
@@ -50,9 +46,12 @@ class Wasm: RCTEventEmitter, WKScriptMessageHandler {
     }
     
     @objc
-    func instantiate(_ bytes: NSString, resolver resolve: @escaping RCTPromiseResolveBlock, rejecter reject: @escaping RCTPromiseRejectBlock) -> Void {
+    func instantiate(_ modId: NSString, bytesStr bytes: NSString, resolver resolve: @escaping RCTPromiseResolveBlock, rejecter reject: @escaping RCTPromiseRejectBlock) -> Void {
         DispatchQueue.main.async {
-            self.webView.evaluateJavaScript("instantiate([\(bytes)]);") { (value, error) in
+            self.webView.evaluateJavaScript("""
+            instantiate("\(modId)", [\(bytes)]);
+            """
+            ) { (value, error) in
                 if error != nil {
                     return reject("error", "failed to instantiate", error)
                 }

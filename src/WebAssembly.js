@@ -4,9 +4,16 @@ import { Instance as WasmInstance } from "./Instance";
 const { Wasm } = NativeModules;
 const eventEmitter = new NativeEventEmitter(Wasm);
 
+const generateId = () => {
+  return (
+    new Date().getTime().toString(16) +
+    Math.floor(1000 * Math.random()).toString(16)
+  );
+};
+
 const instantiate = (buffer) =>
   new Promise((resolve, reject) => {
-    let id = "";
+    const id = generateId();
     const subResolve = eventEmitter.addListener("resolve", (keys) => {
       subResolve.remove();
       if (!id || !keys) {
@@ -20,13 +27,11 @@ const instantiate = (buffer) =>
       });
     });
 
-    Wasm.instantiate(buffer.toString())
+    Wasm.instantiate(id, buffer.toString())
       .then((res) => {
         if (!res) {
           subResolve.remove();
           reject("failed to instantiate WebAssembly");
-        } else {
-          id = res;
         }
       })
       .catch((e) => {
