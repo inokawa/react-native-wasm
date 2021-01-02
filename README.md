@@ -25,7 +25,7 @@ https://reactnative.dev/docs/native-modules-ios#exporting-swift
 
 ### Requirements
 
-- react-native 0.59+ (because of [Proxy](https://developer.mozilla.org/ja/docs/Web/JavaScript/Reference/Global_Objects/Proxy) support in React Native)
+- react-native 0.59+ (because of [Proxy](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy) support in React Native)
 
 ## Usage
 
