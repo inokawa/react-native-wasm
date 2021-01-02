@@ -1,6 +1,27 @@
 import Foundation
 import WebKit
 
+let js: String = """
+var wasm = {};
+var promise = {};
+function generateId() {
+  return new Date().getTime().toString(16) + Math.floor(1000 * Math.random()).toString(16);
+}
+function instantiate(bytes){
+  var id = generateId();
+  promise[id] = WebAssembly.instantiate(Uint8Array.from(bytes))
+    .then(function(res){
+      delete promise[id];
+      wasm[id] = res;
+      window.webkit.messageHandlers.resolve.postMessage(JSON.stringify(Object.keys(res.instance.exports)));
+    }).catch(function(e){
+      delete promise[id];
+      // TODO handle error
+    });
+  return id;
+}
+"""
+
 @objc(Wasm)
 class Wasm: RCTEventEmitter, WKScriptMessageHandler {
     
@@ -16,62 +37,51 @@ class Wasm: RCTEventEmitter, WKScriptMessageHandler {
         
         webView = WKWebView(frame: .zero, configuration: webCfg)
         
-        let js: String = """
-        var wasm = {};
-        var promise = {};
-        function generateId() {
-          return new Date().getTime().toString(16) + Math.floor(1000 * Math.random()).toString(16);
+        DispatchQueue.main.async {
+            self.webView.evaluateJavaScript(js) { (value, error) in
+                // NOP
+            }
         }
-        function instantiate(bytes){
-          var id = generateId();
-          promise[id] = WebAssembly.instantiate(Uint8Array.from(bytes))
-            .then(function(res){
-              delete promise[id];
-              wasm[id] = res;
-              window.webkit.messageHandlers.resolve.postMessage(JSON.stringify({id: id, keys: Object.keys(wasm.instance.exports)}));
-            }).catch(function(e){
-              delete promise[id];
-              // TODO handle error
-            });
-          return true;
-        }
-        """
     }
     
     @objc
     override static func requiresMainQueueSetup() -> Bool {
-      return true
+        return true
     }
     
     @objc
-    func instantiate(_ bytes: NSString, resolver resolve: @escaping RCTPromiseResolveBlock, rejecter reject: RCTPromiseRejectBlock) -> Void {
+    func instantiate(_ bytes: NSString, resolver resolve: @escaping RCTPromiseResolveBlock, rejecter reject: @escaping RCTPromiseRejectBlock) -> Void {
         DispatchQueue.main.async {
             self.webView.evaluateJavaScript("instantiate([\(bytes)]);") { (value, error) in
-                if error {
+                if error != nil {
                     return reject("error", "failed to instantiate", error)
                 }
                 resolve(value)
             }
         }
     }
-
+    
     @objc @discardableResult
     func call(_ modId: NSString, funcName name: NSString, arguments args: NSString) -> NSNumber {
         var result: NSNumber = 0
         var isCompletion: Bool = false
         let js: String = """
         (function(){
-          return wasm[\(modId)].instance.exports.\(name)(...\(args));
+          return wasm["\(modId)"].instance.exports.\(name)(...\(args));
         })();
         """
         DispatchQueue.main.async {
             self.webView.evaluateJavaScript(js) { (value, error) in
                 // TODO handle error
-                result = value as! NSNumber ?? 0
+                if value == nil {
+                    result = 0
+                } else {
+                    result = value as! NSNumber
+                }
                 isCompletion = true
             }
         }
-
+        
         while !isCompletion { RunLoop.current.run(mode: .default, before: Date() + 0.25) }
         return result
     }

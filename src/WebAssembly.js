@@ -6,19 +6,18 @@ const eventEmitter = new NativeEventEmitter(Wasm);
 
 const instantiate = (buffer) =>
   new Promise((resolve, reject) => {
-    const subResolve = eventEmitter.addListener("resolve", (res) => {
+    let id = "";
+    const subResolve = eventEmitter.addListener("resolve", (keys) => {
       subResolve.remove();
-      try {
-        const { id, keys } = JSON.parse(res);
-        resolve({
-          instance: new WasmInstance(id, keys),
-          module: {
-            // TODO
-          },
-        });
-      } catch (e) {
-        reject(e);
+      if (!id || !keys) {
+        reject("failed to instantiate WebAssembly");
       }
+      resolve({
+        instance: new WasmInstance(id, keys),
+        module: {
+          // TODO
+        },
+      });
     });
 
     Wasm.instantiate(buffer.toString())
@@ -26,6 +25,8 @@ const instantiate = (buffer) =>
         if (!res) {
           subResolve.remove();
           reject("failed to instantiate WebAssembly");
+        } else {
+          id = res;
         }
       })
       .catch((e) => {
@@ -47,7 +48,7 @@ export const WebAssembly = {
   // Do not support because `FileReader.readAsArrayBuffer` is not supported by React Native currently.
   // compileStreaming: () => {},
   validate: () => true,
-  Instance: WasmInstance,
+  Instance: () => {},
   Module: () => {},
   Memory: () => {},
   Table: () => {},
