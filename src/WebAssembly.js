@@ -2,6 +2,7 @@ import { NativeModules, NativeEventEmitter } from "react-native";
 import { Instance as WasmInstance } from "./Instance";
 
 const { Wasm } = NativeModules;
+const eventEmitter = new NativeEventEmitter(Wasm);
 
 const generateId = () => {
   return (
@@ -13,21 +14,28 @@ const generateId = () => {
 const instantiate = (buffer) =>
   new Promise((resolve, reject) => {
     const id = generateId();
+    const subResolve = eventEmitter.addListener("resolve", (keys) => {
+      subResolve.remove();
+      if (!id || !keys) {
+        reject("failed to instantiate WebAssembly");
+      }
+      resolve({
+        instance: new WasmInstance(id, keys),
+        module: {
+          // TODO
+        },
+      });
+    });
 
     Wasm.instantiate(id, buffer.toString())
-      .then((keys) => {
-        if (!keys) {
-          reject("failed to get exports");
-        } else {
-          resolve({
-            instance: new WasmInstance(id, keys),
-            module: {
-              // TODO
-            },
-          });
+      .then((res) => {
+        if (!res) {
+          subResolve.remove();
+          reject("failed to instantiate WebAssembly");
         }
       })
       .catch((e) => {
+        subResolve.remove();
         reject(e);
       });
   });
