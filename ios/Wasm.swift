@@ -64,13 +64,11 @@ class Wasm: RCTEventEmitter, WKScriptMessageHandler {
     func call(_ modId: NSString, funcName name: NSString, arguments args: NSString) -> NSNumber {
         var result: NSNumber = 0
         var isCompletion: Bool = false
-        let js: String = """
-        (function(){
-          return wasm["\(modId)"].instance.exports.\(name)(...\(args));
-        })();
-        """
         DispatchQueue.main.async {
-            self.webView.evaluateJavaScript(js) { (value, error) in
+            self.webView.evaluateJavaScript("""
+            wasm["\(modId)"].instance.exports.\(name)(...\(args));
+            """
+            ) { (value, error) in
                 // TODO handle error
                 if value == nil {
                     result = 0
