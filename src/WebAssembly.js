@@ -38,13 +38,14 @@ export const WebAssembly = {
   instantiate: (buffer, importObject) => {
     return instantiate(buffer);
   },
-  // `instantiateStreaming` do not work because `FileReader.readAsArrayBuffer` is not supported by React Native currently.
+  // Do not support because `FileReader.readAsArrayBuffer` is not supported by React Native currently.
   // instantiateStreaming: (response, importObject) =>
   //   Promise.resolve(response.arrayBuffer()).then((bytes) =>
   //     instantiate(bytes)
   //   ),
   compile: (bytes) => {},
-  compileStreaming: () => {},
+  // Do not support because `FileReader.readAsArrayBuffer` is not supported by React Native currently.
+  // compileStreaming: () => {},
   validate: () => true,
   Instance: WasmInstance,
   Module: () => {},
