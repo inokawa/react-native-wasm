@@ -17,11 +17,11 @@ class Wasm: RCTEventEmitter, WKScriptMessageHandler {
         webView = WKWebView(frame: .zero, configuration: webCfg)
         
         let js: String = """
-        var generateId = function () {
-          return new Date().getTime().toString(16) + Math.floor(1000 * Math.random()).toString(16);
-        }
         var wasm = {};
         var promise = {};
+        function generateId() {
+          return new Date().getTime().toString(16) + Math.floor(1000 * Math.random()).toString(16);
+        }
         function instantiate(bytes){
           var id = generateId();
           promise[id] = WebAssembly.instantiate(Uint8Array.from(bytes))
