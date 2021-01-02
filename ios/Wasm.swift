@@ -61,7 +61,7 @@ class Wasm: RCTEventEmitter, WKScriptMessageHandler {
     }
     
     @objc @discardableResult
-    func call(_ modId: NSString, funcName name: NSString, arguments args: NSString) -> NSNumber {
+    func callSync(_ modId: NSString, funcName name: NSString, arguments args: NSString) -> NSNumber {
         var result: NSNumber = 0
         var isCompletion: Bool = false
         DispatchQueue.main.async {
