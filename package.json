@@ -3,12 +3,12 @@
   "title": "React Native Wasm",
   "version": "0.0.2",
   "description": "A polyfill to use WebAssembly in React Native.",
-  "main": "index.js",
+  "main": "src/index.js",
   "files": [
     "README.md",
     "android",
-    "index.js",
     "ios",
+    "src",
     "react-native-wasm.podspec"
   ],
   "scripts": {
