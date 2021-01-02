@@ -6,8 +6,8 @@ if (Platform.OS === "ios") {
 
   const instantiate = (buffer) =>
     new Promise((resolve, reject) => {
-      const subscription = eventEmitter.addListener("resolve", (res) => {
-        subscription.remove();
+      const subResolve = eventEmitter.addListener("resolve", (res) => {
+        subResolve.remove();
         try {
           const { id, keys } = JSON.parse(res);
           resolve({
@@ -27,12 +27,12 @@ if (Platform.OS === "ios") {
       Wasm.instantiate(buffer.toString())
         .then((res) => {
           if (!res) {
-            subscription.remove();
+            subResolve.remove();
             reject("failed to instantiate WebAssembly");
           }
         })
         .catch((e) => {
-          subscription.remove();
+          subResolve.remove();
           reject(e);
         });
     });
