@@ -1,11 +1,15 @@
 package com.reactnativewasm
 
+import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.webkit.JavascriptInterface
+import android.webkit.ValueCallback
 import android.webkit.WebView
+import androidx.annotation.RequiresApi
 import com.facebook.react.bridge.*
 import com.facebook.react.modules.core.DeviceEventManagerModule.RCTDeviceEventEmitter
+
 
 const val js: String = """
 var wasm = {};
@@ -45,11 +49,13 @@ class WasmModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaMo
     init {
         val self = this;
         Handler(Looper.getMainLooper()).post(object : Runnable {
+            @RequiresApi(Build.VERSION_CODES.KITKAT)
             override fun run() {
                 webView = WebView(context);
                 webView.settings.javaScriptEnabled = true
                 webView.addJavascriptInterface(JSHandler(self), "android")
-                webView.loadUrl("javascript:" + js)
+                webView.evaluateJavascript("javascript:" + js, ValueCallback<String> { reply -> // NOP
+                })
             }
         });
     }
@@ -61,14 +67,17 @@ class WasmModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaMo
     @ReactMethod
     fun instantiate(id: String, bytes: String, promise: Promise) {
         Handler(Looper.getMainLooper()).post(object : Runnable {
+            @RequiresApi(Build.VERSION_CODES.KITKAT)
             override fun run() {
-                webView.loadUrl("""
+                webView.evaluateJavascript("""
                     javascript:instantiate("$id", [$bytes]);
-                    """)
+                    """, ValueCallback<String> {
+                    // TODO handle error
+                    reply ->
+                    promise.resolve(true)
+                })
             }
         });
-        // TODO handle error
-        promise.resolve(true)
     }
 
     @ReactMethod(isBlockingSynchronousMethod = true)
