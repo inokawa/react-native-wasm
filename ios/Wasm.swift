@@ -63,7 +63,7 @@ class Wasm: RCTEventEmitter, WKScriptMessageHandler {
     @objc @discardableResult
     func callSync(_ modId: NSString, funcName name: NSString, arguments args: NSString) -> NSNumber {
         var result: NSNumber = 0
-        var isCompletion: Bool = false
+        let semaphore = DispatchSemaphore(value: 0)
         DispatchQueue.main.async {
             self.webView.evaluateJavaScript("""
             wasm["\(modId)"].instance.exports.\(name)(...\(args));
@@ -75,11 +75,11 @@ class Wasm: RCTEventEmitter, WKScriptMessageHandler {
                 } else {
                     result = value as! NSNumber
                 }
-                isCompletion = true
+                semaphore.signal()
             }
         }
         
-        while !isCompletion { RunLoop.current.run(mode: .default, before: Date() + 0.25) }
+        semaphore.wait()
         return result
     }
     
