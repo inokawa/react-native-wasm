@@ -65,3 +65,4 @@ WebAssembly.instantiate(buffer).then((res) => {
 - [ ] WebAssembly.Module
 - [ ] WebAssembly.Memory
 - [ ] WebAssembly.Table
+- [ ] Support bundling .wasm file
