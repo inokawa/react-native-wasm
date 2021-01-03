@@ -1,5 +1,7 @@
 package com.reactnativewasm
 
+import android.os.Handler
+import android.os.Looper
 import android.webkit.JavascriptInterface
 import android.webkit.WebView
 import com.facebook.react.bridge.*
@@ -25,13 +27,31 @@ function instantiate(id, bytes){
 class WasmModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext) {
 
     private val context: ReactContext = reactContext
-    private val webView: WebView;
+    lateinit var webView: WebView;
+
+    protected class JSHandler internal constructor(c: WasmModule) {
+        var ctx: WasmModule
+
+        init {
+            ctx = c
+        }
+
+        @JavascriptInterface
+        fun resolve(data: String?) {
+            ctx.sendEvent("resolve", data);
+        }
+    }
 
     init {
-        this.webView = WebView(reactContext.getApplicationContext());
-        this.webView.settings.javaScriptEnabled = true
-        this.webView.addJavascriptInterface(this, "android");
-        this.webView.loadUrl("javascript:" + js)
+        val self = this;
+        Handler(Looper.getMainLooper()).post(object : Runnable {
+            override fun run() {
+                webView = WebView(context);
+                webView.settings.javaScriptEnabled = true
+                webView.addJavascriptInterface(JSHandler(self), "android")
+                webView.loadUrl("javascript:" + js)
+            }
+        });
     }
 
     override fun getName(): String {
@@ -40,9 +60,13 @@ class WasmModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaMo
 
     @ReactMethod
     fun instantiate(id: String, bytes: String, promise: Promise) {
-        this.webView.loadUrl("""
-            javascript:instantiate("$id", [$bytes]);
-            """)
+        Handler(Looper.getMainLooper()).post(object : Runnable {
+            override fun run() {
+                webView.loadUrl("""
+                    javascript:instantiate("$id", [$bytes]);
+                    """)
+            }
+        });
         // TODO handle error
         promise.resolve(true)
     }
@@ -57,14 +81,8 @@ class WasmModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaMo
         promise.resolve(true)
     }
 
-    private fun sendEvent(reactContext: ReactContext, eventName: String, params: String?) {
-        reactContext
-                .getJSModule(RCTDeviceEventEmitter::class.java)
+    fun sendEvent(eventName: String, params: String?) {
+        context.getJSModule(RCTDeviceEventEmitter::class.java)
                 .emit(eventName, params)
-    }
-
-    @JavascriptInterface
-    fun resolve(data: String?) {
-        sendEvent(this.context, "resolve", data);
     }
 }
