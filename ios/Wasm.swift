@@ -9,19 +9,34 @@ function instantiate(id, bytes){
     .then(function(res){
       delete promise[id];
       wasm[id] = res;
-      window.webkit.messageHandlers.resolve.postMessage(JSON.stringify(Object.keys(res.instance.exports)));
+      window.webkit.messageHandlers.resolve.postMessage(JSON.stringify({id:id,data:JSON.stringify(Object.keys(res.instance.exports))}));
     }).catch(function(e){
       delete promise[id];
-      // TODO handle error
+      window.webkit.messageHandlers.reject.postMessage(JSON.stringify({id:id,data:e.toString()}));
     });
   return true;
 }
 """
 
+struct Promise {
+    let resolve: RCTPromiseResolveBlock
+    let reject: RCTPromiseRejectBlock
+}
+
+struct JsResult: Codable {
+    let id: String
+    let data: String
+}
+
 @objc(Wasm)
-class Wasm: RCTEventEmitter, WKScriptMessageHandler {
+class Wasm: NSObject, WKScriptMessageHandler {
     
     var webView: WKWebView!
+    var asyncPool: Dictionary<String, Promise> = [:]
+    
+    static func requiresMainQueueSetup() -> Bool {
+        return true
+    }
     
     override init() {
         super.init()
@@ -29,6 +44,7 @@ class Wasm: RCTEventEmitter, WKScriptMessageHandler {
         
         let userController: WKUserContentController = WKUserContentController()
         userController.add(self, name: "resolve")
+        userController.add(self, name: "reject")
         webCfg.userContentController = userController
         
         webView = WKWebView(frame: .zero, configuration: webCfg)
@@ -41,21 +57,18 @@ class Wasm: RCTEventEmitter, WKScriptMessageHandler {
     }
     
     @objc
-    override static func requiresMainQueueSetup() -> Bool {
-        return true
-    }
-    
-    @objc
     func instantiate(_ modId: NSString, bytesStr bytes: NSString, resolver resolve: @escaping RCTPromiseResolveBlock, rejecter reject: @escaping RCTPromiseRejectBlock) -> Void {
+        asyncPool.updateValue(Promise(resolve: resolve, reject: reject), forKey: modId as String)
+        
         DispatchQueue.main.async {
             self.webView.evaluateJavaScript("""
             instantiate("\(modId)", [\(bytes)]);
             """
             ) { (value, error) in
                 if error != nil {
-                    return reject("error", "failed to instantiate", error)
+                    self.asyncPool.removeValue(forKey: modId as String)
+                    reject("error", "\(error)", nil)
                 }
-                resolve(value)
             }
         }
     }
@@ -83,13 +96,22 @@ class Wasm: RCTEventEmitter, WKScriptMessageHandler {
         return result
     }
     
-    override func supportedEvents() -> [String]! {
-        return ["resolve"]
-    }
-    
     func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
-        if(message.name == "resolve") {
-            sendEvent(withName: "resolve", body: message.body)
+        if message.name == "resolve" {
+            let json = try! JSONDecoder().decode(JsResult.self, from: (message.body as! String).data(using: .utf8)!)
+            guard let promise = asyncPool[json.id] else {
+                return
+            }
+            asyncPool.removeValue(forKey: json.id)
+            promise.resolve(json.data)
+        } else if message.name == "reject" {
+            let json = try! JSONDecoder().decode(JsResult.self, from: (message.body as! String).data(using: .utf8)!)
+            guard let promise = asyncPool[json.id] else {
+                return
+            }
+            asyncPool.removeValue(forKey: json.id)
+            promise.reject("error", json.data, nil)
         }
     }
 }
+

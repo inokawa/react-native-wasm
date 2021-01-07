@@ -1,7 +1,6 @@
 #import <React/RCTBridgeModule.h>
-#import <React/RCTEventEmitter.h>
 
-@interface RCT_EXTERN_MODULE(Wasm, RCTEventEmitter)
+@interface RCT_EXTERN_MODULE(Wasm, NSObject)
 
 RCT_EXTERN_METHOD(instantiate:(NSString *)modId bytesStr:(NSString *)bytes resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
 
