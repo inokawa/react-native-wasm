@@ -8,7 +8,6 @@ import android.webkit.ValueCallback
 import android.webkit.WebView
 import androidx.annotation.RequiresApi
 import com.facebook.react.bridge.*
-import kotlinx.coroutines.Runnable
 import java.util.concurrent.CountDownLatch
 import kotlin.collections.HashMap
 
