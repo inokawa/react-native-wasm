@@ -8,7 +8,6 @@ import android.webkit.ValueCallback
 import android.webkit.WebView
 import androidx.annotation.RequiresApi
 import com.facebook.react.bridge.*
-import com.facebook.react.modules.core.DeviceEventManagerModule.RCTDeviceEventEmitter
 import java.util.concurrent.CountDownLatch
 
 
@@ -20,10 +19,10 @@ function instantiate(id, bytes){
     .then(function(res){
       delete promise[id];
       wasm[id] = res;
-      android.resolve(JSON.stringify(Object.keys(res.instance.exports)));
+      android.resolve(id, JSON.stringify(Object.keys(res.instance.exports)));
     }).catch(function(e){
       delete promise[id];
-      // TODO handle error
+      android.reject(id, e.toString());
     });
   return true;
 }
@@ -33,19 +32,7 @@ class WasmModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaMo
 
     private val context: ReactContext = reactContext
     lateinit var webView: WebView;
-
-    protected class JSHandler internal constructor(c: WasmModule) {
-        var ctx: WasmModule
-
-        init {
-            ctx = c
-        }
-
-        @JavascriptInterface
-        fun resolve(data: String?) {
-            ctx.sendEvent("resolve", data);
-        }
-    }
+    val asyncPool = HashMap<String, Promise>()
 
     init {
         val self = this;
@@ -54,7 +41,7 @@ class WasmModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaMo
             override fun run() {
                 webView = WebView(context);
                 webView.settings.javaScriptEnabled = true
-                webView.addJavascriptInterface(JSHandler(self), "android")
+                webView.addJavascriptInterface(JSHandler(self, asyncPool), "android")
                 webView.evaluateJavascript("javascript:" + js, ValueCallback<String> { reply -> // NOP
                 })
             }
@@ -70,15 +57,15 @@ class WasmModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaMo
         Handler(Looper.getMainLooper()).post(object : Runnable {
             @RequiresApi(Build.VERSION_CODES.KITKAT)
             override fun run() {
+                asyncPool[id] = promise
+
                 webView.evaluateJavascript("""
                     javascript:instantiate("$id", [$bytes]);
                     """, ValueCallback<String> { value ->
                     {
-                        // TODO handle error
                         if (value == null) {
-                            promise.reject("error")
-                        } else {
-                            promise.resolve(true)
+                            asyncPool.remove(id)
+                            promise.reject("failed to instantiate")
                         }
                     }
                 })
@@ -113,8 +100,26 @@ class WasmModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaMo
         return result
     }
 
-    fun sendEvent(eventName: String, params: String?) {
-        context.getJSModule(RCTDeviceEventEmitter::class.java)
-                .emit(eventName, params)
+    protected class JSHandler internal constructor(ctx: WasmModule, asyncPool: HashMap<String, Promise>) {
+        val ctx: WasmModule = ctx
+        val asyncPool: HashMap<String, Promise> = asyncPool
+
+        @JavascriptInterface
+        fun resolve(id: String, data: String) {
+            val p = asyncPool[id]
+            if (p != null) {
+                asyncPool.remove(id)
+                p.resolve(data)
+            }
+        }
+
+        @JavascriptInterface
+        fun reject(id: String, data: String) {
+            val p = asyncPool[id]
+            if (p != null) {
+                asyncPool.remove(id)
+                p.reject(data)
+            }
+        }
     }
 }
