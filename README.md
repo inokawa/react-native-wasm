@@ -57,7 +57,7 @@ WebAssembly.instantiate(buffer).then((res) => {
 
 - [x] instantiate
   - [x] Support iOS
-  - [ ] Support Android
+  - [x] Support Android
   - [ ] Support importObject
 - [ ] compile
 - [ ] validate
