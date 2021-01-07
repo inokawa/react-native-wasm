@@ -57,11 +57,11 @@ class WasmModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaMo
 
     @ReactMethod
     fun instantiate(id: String, bytes: String, promise: Promise) {
+        asyncPool[id] = promise
+
         Handler(Looper.getMainLooper()).post(object : Runnable {
             @RequiresApi(Build.VERSION_CODES.KITKAT)
             override fun run() {
-                asyncPool[id] = promise
-
                 webView.evaluateJavascript("""
                     javascript:instantiate("$id", [$bytes]);
                     """, ValueCallback<String> { value ->
@@ -76,13 +76,13 @@ class WasmModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaMo
         });
     }
 
-    @RequiresApi(Build.VERSION_CODES.KITKAT)
     @ReactMethod(isBlockingSynchronousMethod = true)
     fun callSync(id: String, name: String, args: String): Int {
         val latch = CountDownLatch(1)
         syncPool[id] = latch
 
         Handler(context.getMainLooper()).post(object : Runnable {
+            @RequiresApi(Build.VERSION_CODES.KITKAT)
             override fun run() {
                 webView.evaluateJavascript("""
                     javascript:android.returnSync("$id", wasm["$id"].instance.exports.$name(...$args));
