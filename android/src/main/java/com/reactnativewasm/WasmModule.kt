@@ -35,7 +35,7 @@ class WasmModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaMo
     lateinit var webView: WebView;
     val asyncPool = HashMap<String, Promise>()
     val syncPool = HashMap<String, CountDownLatch>()
-    val syncResults = HashMap<String, Int>()
+    val syncResults = HashMap<String, Double>()
 
     init {
         val self = this;
@@ -77,7 +77,7 @@ class WasmModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaMo
     }
 
     @ReactMethod(isBlockingSynchronousMethod = true)
-    fun callSync(id: String, name: String, args: String): Int {
+    fun callSync(id: String, name: String, args: String): Double {
         val latch = CountDownLatch(1)
         syncPool[id] = latch
 
@@ -97,14 +97,14 @@ class WasmModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaMo
         latch.await()
         val result = syncResults[id]
         syncResults.remove(id)
-        return result ?: 0
+        return result ?: 0.0
     }
 
-    protected class JSHandler internal constructor(ctx: WasmModule, asyncPool: HashMap<String, Promise>, syncPool: HashMap<String, CountDownLatch>, syncResults: HashMap<String, Int>) {
+    protected class JSHandler internal constructor(ctx: WasmModule, asyncPool: HashMap<String, Promise>, syncPool: HashMap<String, CountDownLatch>, syncResults: HashMap<String, Double>) {
         val ctx: WasmModule = ctx
         val asyncPool: HashMap<String, Promise> = asyncPool
         val syncPool: HashMap<String, CountDownLatch> = syncPool
-        val syncResults: HashMap<String, Int> = syncResults
+        val syncResults: HashMap<String, Double> = syncResults
 
         @JavascriptInterface
         fun resolve(id: String, data: String) {
@@ -125,7 +125,7 @@ class WasmModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaMo
         }
 
         @JavascriptInterface
-        fun returnSync(id: String, data: Int) {
+        fun returnSync(id: String, data: Double) {
             val l = syncPool[id]
             if (l != null) {
                 syncPool.remove(id)
