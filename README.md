@@ -1,5 +1,7 @@
 # react-native-wasm
 
+![npm](https://img.shields.io/npm/v/react-native-wasm)
+
 A polyfill to use [WebAssembly](https://webassembly.org/) in [React Native](https://github.com/facebook/react-native).
 
 This package instantiate WebAssembly in native WebView environment and make communication with React Native to simulate original behavior.
