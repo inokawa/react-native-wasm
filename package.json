@@ -1,7 +1,7 @@
 {
   "name": "react-native-wasm",
   "title": "React Native Wasm",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "A polyfill to use WebAssembly in React Native.",
   "main": "src/index.js",
   "files": [
