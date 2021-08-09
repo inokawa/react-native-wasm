@@ -1,7 +1,19 @@
 import { NativeModules } from "react-native";
-import { Instance as WasmInstance } from "./Instance";
 
 const { Wasm } = NativeModules;
+
+class WasmInstance {
+  _exports;
+  constructor(id, keys) {
+    this._exports = JSON.parse(keys).reduce((acc, k) => {
+      acc[k] = (...args) => Wasm.callSync(id, k, JSON.stringify(args));
+      return acc;
+    }, {});
+  }
+  get exports() {
+    return this._exports;
+  }
+}
 
 const generateId = () => {
   return (
