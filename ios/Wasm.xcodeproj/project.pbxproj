@@ -8,10 +8,9 @@
 
 /* Begin PBXBuildFile section */
 
-
-		F4FF95D7245B92E800C19C63 /*  Wasm.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4FF95D6245B92E800C19C63 /*  Wasm.swift */; };
-
+		5E46D8CD2428F78900513E24 /* example.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5E46D8CB2428F78900513E24 /* example.cpp */; };
 		5E555C0D2413F4C50049A1A2 /* Wasm.mm in Sources */ = {isa = PBXBuildFile; fileRef = B3E7B5891CC2AC0600A0062D /* Wasm.mm */; };
+
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -29,10 +28,9 @@
 /* Begin PBXFileReference section */
 		134814201AA4EA6300B7C361 /* libWasm.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libWasm.a; sourceTree = BUILT_PRODUCTS_DIR; };
 
-
-		B3E7B5891CC2AC0600A0062D /* Wasm.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Wasm.m; sourceTree = "<group>"; };
-		F4FF95D5245B92E700C19C63 /* Wasm-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Wasm-Bridging-Header.h"; sourceTree = "<group>"; };
-		F4FF95D6245B92E800C19C63 /* Wasm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Wasm.swift; sourceTree = "<group>"; };
+		5E46D8CB2428F78900513E24 /* example.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = example.cpp; path = ../cpp/example.cpp; sourceTree = "<group>"; };
+		5E46D8CC2428F78900513E24 /* example.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = example.h; path = ../cpp/example.h; sourceTree = "<group>"; };
+		B3E7B5891CC2AC0600A0062D /* Wasm.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = Wasm.mm; sourceTree = "<group>"; };
 
 /* End PBXFileReference section */
 
@@ -59,10 +57,9 @@
 			isa = PBXGroup;
 			children = (
 
-
-				F4FF95D6245B92E800C19C63 /* Wasm.swift */,
-				B3E7B5891CC2AC0600A0062D /* Wasm.m */,
-				F4FF95D5245B92E700C19C63 /* Wasm-Bridging-Header.h */,
+				5E46D8CB2428F78900513E24 /* example.cpp */,
+				5E46D8CC2428F78900513E24 /* example.h */,
+				B3E7B5891CC2AC0600A0062D /* Wasm.mm */,
 
 				134814211AA4EA7D00B7C361 /* Products */,
 			);
@@ -126,9 +123,8 @@
 			buildActionMask = 2147483647;
 			files = (
 
-
-				F4FF95D7245B92E800C19C63 /* Wasm.swift in Sources */,
-				B3E7B58A1CC2AC0600A0062D /* Wasm.m in Sources */,
+				5E46D8CD2428F78900513E24 /* example.cpp in Sources */,
+				5E555C0D2413F4C50049A1A2 /* Wasm.mm in Sources */,
 
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -243,10 +239,6 @@
 				PRODUCT_NAME = Wasm;
 				SKIP_INSTALL = YES;
 
-				SWIFT_OBJC_BRIDGING_HEADER = "Wasm-Bridging-Header.h";
-				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-				SWIFT_VERSION = 5.0;
-
 			};
 			name = Debug;
 		};
@@ -263,9 +255,6 @@
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = Wasm;
 				SKIP_INSTALL = YES;
-
-				SWIFT_OBJC_BRIDGING_HEADER = "Wasm-Bridging-Header.h";
-				SWIFT_VERSION = 5.0;
 
 			};
 			name = Release;
