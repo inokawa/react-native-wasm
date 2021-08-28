@@ -40,6 +40,9 @@ android.iml
 #
 example/ios/Pods
 
+# cpp
+.cxx
+
 # node.js
 #
 node_modules/

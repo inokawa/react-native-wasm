@@ -1,9 +1,5 @@
-import { NativeModules } from 'react-native';
+declare function example(a: number, b: number): number;
 
-type WasmType = {
-  multiply(a: number, b: number): Promise<number>;
-};
-
-const { Wasm } = NativeModules;
-
-export default Wasm as WasmType;
+export function multiply(a: number, b: number): number {
+  return example(a, b);
+}

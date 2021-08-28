@@ -1,13 +1,14 @@
 import * as React from 'react';
 
 import { StyleSheet, View, Text } from 'react-native';
-import Wasm from 'react-native-wasm';
+import { multiply } from 'react-native-wasm';
 
 export default function App() {
   const [result, setResult] = React.useState<number | undefined>();
 
   React.useEffect(() => {
-    Wasm.multiply(3, 7).then(setResult);
+    const res = multiply(123, 456);
+    setResult(res);
   }, []);
 
   return (

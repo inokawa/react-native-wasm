@@ -1,8 +1,8 @@
-#ifndef EXAMPLE_H
-#define EXAMPLE_H
+#include <jsi/jsilib.h>
+#include <jsi/jsi.h>
 
-namespace example {
-  int multiply(float a, float b);
+namespace example
+{
+  void setup(facebook::jsi::Runtime &jsiRuntime);
+  void cleanUp();
 }
-
-#endif /* EXAMPLE_H */

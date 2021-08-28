@@ -2,40 +2,39 @@ package com.reactnativewasm;
 
 import androidx.annotation.NonNull;
 
-import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
-import com.facebook.react.bridge.ReactMethod;
-import com.facebook.react.module.annotations.ReactModule;
 
-@ReactModule(name = WasmModule.NAME)
 public class WasmModule extends ReactContextBaseJavaModule {
     public static final String NAME = "Wasm";
 
     public WasmModule(ReactApplicationContext reactContext) {
-        super(reactContext);
-    }
-
-    @Override
-    @NonNull
-    public String getName() {
-        return NAME;
+      super(reactContext);
     }
 
     static {
-        try {
-            // Used to load the 'native-lib' library on application startup.
-            System.loadLibrary("cpp");
-        } catch (Exception ignored) {
-        }
+      System.loadLibrary("example");
     }
 
-    // Example method
-    // See https://reactnative.dev/docs/native-modules-android
-    @ReactMethod
-    public void multiply(int a, int b, Promise promise) {
-        promise.resolve(nativeMultiply(a, b));
+    private static native void setup(long jsiPtr);
+    private static native void cleanUp();
+
+    @NonNull
+    @Override
+    public String getName() {
+      return NAME;
     }
 
-    public static native int nativeMultiply(int a, int b);
+    @NonNull
+    @Override
+    public void initialize() {
+      super.initialize();
+
+      WasmModule.setup(this.getReactApplicationContext().getJavaScriptContextHolder().get());
+    }
+
+    @Override
+    public void onCatalystInstanceDestroy() {
+      WasmModule.cleanUp();
+    }
 }
