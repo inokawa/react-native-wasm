@@ -14,18 +14,11 @@ import kotlin.collections.HashMap
 
 const val js: String = """
 var wasm = {};
-var promise = {};
 function instantiate(id, bytes){
-  promise[id] = WebAssembly.instantiate(Uint8Array.from(bytes))
-    .then(function(res){
-      delete promise[id];
-      wasm[id] = res;
-      android.resolve(id, JSON.stringify(Object.keys(res.instance.exports)));
-    }).catch(function(e){
-      delete promise[id];
-      android.reject(id, e.toString());
-    });
-  return true;
+  var wasmModule = new WebAssembly.Module(Uint8Array.from(bytes));
+  var instance = new WebAssembly.Instance(wasmModule);
+  wasm[id] = instance;
+  return JSON.stringify(Object.keys(instance.exports));
 }
 """
 
@@ -33,7 +26,6 @@ class WasmModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaMo
 
     private val context: ReactContext = reactContext
     lateinit var webView: WebView;
-    val asyncPool = HashMap<String, Promise>()
     val syncPool = HashMap<String, CountDownLatch>()
     val syncResults = HashMap<String, Double>()
 
@@ -44,7 +36,7 @@ class WasmModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaMo
             override fun run() {
                 webView = WebView(context);
                 webView.settings.javaScriptEnabled = true
-                webView.addJavascriptInterface(JSHandler(self, asyncPool, syncPool, syncResults), "android")
+                webView.addJavascriptInterface(JSHandler(self, syncPool, syncResults), "android")
                 webView.evaluateJavascript("javascript:" + js, ValueCallback<String> { reply -> // NOP
                 })
             }
@@ -57,8 +49,6 @@ class WasmModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaMo
 
     @ReactMethod
     fun instantiate(id: String, bytes: String, promise: Promise) {
-        asyncPool[id] = promise
-
         Handler(Looper.getMainLooper()).post(object : Runnable {
             @RequiresApi(Build.VERSION_CODES.KITKAT)
             override fun run() {
@@ -67,8 +57,9 @@ class WasmModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaMo
                     """, ValueCallback<String> { value ->
                     {
                         if (value == null) {
-                            asyncPool.remove(id)
                             promise.reject("failed to instantiate")
+                        } else {
+                            promise.resolve(value)
                         }
                     }
                 })
@@ -100,29 +91,10 @@ class WasmModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaMo
         return result ?: 0.0
     }
 
-    protected class JSHandler internal constructor(ctx: WasmModule, asyncPool: HashMap<String, Promise>, syncPool: HashMap<String, CountDownLatch>, syncResults: HashMap<String, Double>) {
+    protected class JSHandler internal constructor(ctx: WasmModule, syncPool: HashMap<String, CountDownLatch>, syncResults: HashMap<String, Double>) {
         val ctx: WasmModule = ctx
-        val asyncPool: HashMap<String, Promise> = asyncPool
         val syncPool: HashMap<String, CountDownLatch> = syncPool
         val syncResults: HashMap<String, Double> = syncResults
-
-        @JavascriptInterface
-        fun resolve(id: String, data: String) {
-            val p = asyncPool[id]
-            if (p != null) {
-                asyncPool.remove(id)
-                p.resolve(data)
-            }
-        }
-
-        @JavascriptInterface
-        fun reject(id: String, data: String) {
-            val p = asyncPool[id]
-            if (p != null) {
-                asyncPool.remove(id)
-                p.reject(data)
-            }
-        }
 
         @JavascriptInterface
         fun returnSync(id: String, data: Double) {

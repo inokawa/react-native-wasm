@@ -27,16 +27,19 @@ const instantiate = (buffer) =>
     const id = generateId();
 
     Wasm.instantiate(id, buffer.toString())
-      .then((keys) => {
-        if (!keys) {
-          reject("failed to get exports");
-        } else {
+      .then((res) => {
+        if (!res) return reject("failed to contact to webview");
+
+        try {
+          const keys = JSON.parse(res);
           resolve({
-            instance: new WasmInstance(id, keys),
+            instance: new WasmInstance(keys),
             module: {
               // TODO
             },
           });
+        } catch (e) {
+          reject(e);
         }
       })
       .catch((e) => {
