@@ -5,6 +5,7 @@ set (CMAKE_CXX_STANDARD 11)
 
 include_directories(
   ../cpp
+  ../module
   ../node_modules/react-native/React
   ../node_modules/react-native/React/Base
   ../node_modules/react-native/ReactCommon/jsi
@@ -12,10 +13,15 @@ include_directories(
 
 add_library(example
   SHARED
-  ../node_modules/react-native/ReactCommon/jsi/jsi/jsi.cpp
+  cpp-adapter.cpp
   ../cpp/example.cpp
   ../cpp/example.h
-  cpp-adapter.cpp
+  ../module/wasm-lib.c
+  ../module/wasm-lib.h
+  ../module/wasm-rt-impl.c
+  ../module/wasm-rt-impl.h
+  ../module/wasm-rt.h
+  ../node_modules/react-native/ReactCommon/jsi/jsi/jsi.cpp
 )
 
 target_link_libraries(example)
