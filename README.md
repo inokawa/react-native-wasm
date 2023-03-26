@@ -11,10 +11,12 @@ Native module of React Native has limited argument types ([iOS](https://reactnat
 
 I recommend using [react-native-react-bridge](https://github.com/inokawa/react-native-react-bridge) rather than this to run WebAssembly. Although its aim is a bit different, it's built on WebView like this and it's working much more stably.
 
-And also check the current progress of wasm support in React Native:
+And check the current progress of wasm support in React Native:
 
 - https://github.com/react-native-community/jsc-android-buildscripts/issues/113
 - https://github.com/facebook/hermes/issues/429
+
+And also check https://github.com/cawfree/react-native-webassembly
 
 ## Install
 
