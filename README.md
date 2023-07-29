@@ -7,16 +7,16 @@ A polyfill to use [WebAssembly](https://webassembly.org/) in [React Native](http
 This package instantiates WebAssembly in a native WebView environment and makes the communication with React Native to simulate original behavior.
 Native module of React Native has limited argument types ([iOS](https://reactnative.dev/docs/native-modules-ios#argument-types)/[Android](https://reactnative.dev/docs/native-modules-android#argument-types)) so we need to serialize/deserialize the exchanged data, which may have some overhead but will work as in a web app.
 
-### ⚠️ Note
-
-I recommend using [react-native-react-bridge](https://github.com/inokawa/react-native-react-bridge) rather than this to run WebAssembly. Although its aim is a bit different, it's built on WebView like this and it's working much more stably.
-
-And check the current progress of wasm support in React Native:
-
-- https://github.com/react-native-community/jsc-android-buildscripts/issues/113
-- https://github.com/facebook/hermes/issues/429
-
-And also check https://github.com/cawfree/react-native-webassembly
+> **Warning**
+> 
+> I recommend using [react-native-react-bridge](https://github.com/inokawa/react-native-react-bridge) rather than this to run WebAssembly. Although its aim is a bit different, it's built on WebView like this and it's working much more stably.
+> 
+> And check the current progress of wasm support in React Native:
+> 
+> - https://github.com/react-native-community/jsc-android-buildscripts/issues/113
+> - https://github.com/facebook/hermes/issues/429
+> 
+> And also check https://github.com/cawfree/react-native-webassembly
 
 ## Install
 
